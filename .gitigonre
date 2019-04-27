@@ -1,0 +1,19 @@
+*.zip
+**/.*.swp
+**/*.retry
+bootstrap
+**/*.DS_Store
+.idea
+*_id.txt
+timer_*.*
+merge-request.tmp
+
+### Terraform ###
+plugin-cache/
+# Compiled files
+**/*.tfstate
+**/*.tfplan
+**/*.tfstate.backup
+**/.terraform
+**/.terraform/*
+
