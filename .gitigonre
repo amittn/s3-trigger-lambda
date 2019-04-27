@@ -9,6 +9,6 @@ plugin-cache/
 *.tfstate
 *.tfplan
 *.tfstate.backup
-**/.terraform
-**/.terraform/*
+.terraform
+.terraform/*
 
