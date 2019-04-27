@@ -23,10 +23,28 @@ resource "aws_iam_role" "iam_for_lambda" {
   assume_role_policy = "${data.aws_iam_policy_document.policy.json}"
 }
 
-resource "aws_iam_role_policy_attachment" "lambda_logs_role_policy_attach" {
-  role       = "${aws_iam_role.iam_for_lambda.name}"
-  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+resource "aws_iam_role_policy" "frontend_lambda_role_policy" {
+  name   = "frontend-lambda-role-policy"
+  role   = "${aws_iam_role.iam_for_lambda.id}"
+  policy = "${data.aws_iam_policy_document.lambda_log_role_policy.json}"
 }
+
+data "aws_iam_policy_document" "lambda_log_role_policy" {
+
+   statement {
+    effect = "Allow"
+
+    actions = [
+      "logs:CreateLogGroup",
+      "logs:CreateLogStream",
+      "logs:PutLogEvents",
+    ]
+
+    resources = ["*"]
+  }
+
+}
+
 
 
 # lambda
@@ -34,8 +52,8 @@ provider "archive" {}
 
 data "archive_file" "zip" {
   type        = "zip"
-  source_file = "hello_lambda.py"
-  output_path = "hello_lambda.zip"
+  source_file = "s3_trigger_lambda.py"
+  output_path = "s3_trigger.zip"
 }
 
 resource "aws_lambda_function" "lambda" {
@@ -45,19 +63,19 @@ resource "aws_lambda_function" "lambda" {
   source_code_hash = "${data.archive_file.zip.output_base64sha256}"
 
   role    = "${aws_iam_role.iam_for_lambda.arn}"
-  handler = "hello_lambda.lambda_handler"
+  handler = "s3_trigger_lambda.lambda_handler"
   runtime = "python3.6"
 
   environment {
     variables = {
-      greeting = "Hello amit"
+      environment = "dev-setup"
     }
   }
 }
 
 
 resource "aws_s3_bucket" "bucket" {
-  bucket = "0371-amit-name"
+  bucket = "customer-invoice-ls"
 }
 
 resource "aws_s3_bucket_notification" "bucket_notification" {
